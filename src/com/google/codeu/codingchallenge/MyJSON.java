@@ -17,38 +17,59 @@ package com.google.codeu.codingchallenge;
 import java.util.Collection;
 
 final class MyJSON implements JSON {
-
-  @Override
-  public JSON getObject(String name) {
-    // TODO: implement this
-    return null;
+	
+	private Map<String, JSON> jsMap;
+	private Map<String, String> stringMap;
+	
+  public MyJson(){
+	  StringsMap = new HashMap<String, String>();
+	  jsMap = new HashMap<String, JSON>();  
   }
-
+  //returns the JSON object associated with a string
+  public JSON getObject(String name) {
+	  if(name.length() < 2)
+		  throw new illegalArgumentException("Not a valid input");
+	  
+	return jsMap.get(name);
+  }
+  
+  //essentially an add method, puts a new object in the map
   @Override
   public JSON setObject(String name, JSON value) {
-    // TODO: implement this
-    return this;
+	 jsMap.put(name, value);
+     
+	 return value;
   }
-
+  
+  //gets a string corresponding with a string
   @Override
   public String getString(String name) {
     // TODO: implement this
-    return null;
+    return stringMap.get(name);
   }
-
+  
+  //adds to the string map
   @Override
   public JSON setString(String name, String value) {
     // TODO: implement this
+	stringMap.put(name, value);
     return this;
   }
-
+  //makes a deep copy of all the JSON objects in the JS map
   @Override
   public void getObjects(Collection<String> names) {
-    // TODO: implement this
+	  
+	  for(JSON js: jsMap){
+		  names.add(jsMap.get(js));
+	  }
   }
 
+  //makes a deep copy of all the strings into the collection names
   @Override
   public void getStrings(Collection<String> names) {
     // TODO: implement this
+	  for(String str: stringMap){
+		  names.add(stringMap.get(str));
+	  }
   }
 }
