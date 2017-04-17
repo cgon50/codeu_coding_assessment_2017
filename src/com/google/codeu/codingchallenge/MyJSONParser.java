@@ -12,83 +12,99 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.codeu.codingchallenge;
+
 
 import java.io.IOException;
 import java.util.Scanner;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 final class MyJSONParser implements JSONParser {
 
-
+	final static int isObject = Integer.MAX_VALUE;
+	final static int isString = Integer.MIN_VALUE;
 	@Override
 	public JSON parse(String in) throws IOException {
+		MyJSON js = new MyJSON();
 		//count brackets make sure they match
-		if(!bracketsOkay(in)){
-			throw new illegalStateError("Mismatched brackets error");
+		if(!syntaxOkay(in)){
+			throw new IllegalStateException("Mismatched brackets error");
 		}
-		//skip until next nonbrace - non space character
-		int start = nonSpaceIndex(in, 0);
-		//if the first charater isnt a quotation mark then bad syntax
-		if(in.charAt(start) == '\\'){
+		//get rid of spaces to make things easier
+		String withoutSpaces = remove(in, ' ');
+		//handles edge case of an empty object
+		String withoutBraces = remove(withoutSpaces, '{');
+		withoutBraces = remove(withoutBraces, '}');
+		if(withoutBraces.length() == 0){
+			return js;
+		}
+		int colonIndex = in.indexOf(":");
+		String key = in.substring(0, colonIndex);
+		String value = in.substring(colonIndex + 1);
+		System.out.println(key + "   " + value);
+		
+		if(value.contains(":")){
+			//this means the value is an object
+			String[] values = value.split(",");
+			for(int i = 0; i < values.length; i++){
+				
+				values[i] = remove(values[i], '{');
+				values[i] = remove(values[i], '}');
+				parse(values[i]);
+					
+			}
 			
+		}else{
+			//the base case that actually puts things as a JSON object
+			key = removeOutsides(key);
+			value = removeOutsides(value);
+			js.setString(key, value);
 		}
-		if(!in.charAt(start) == "\""){
-			 throw new illegalStateError("mismatched quotation mark");
+		
+		return js;
+	}
+	//makes a new string from within the quotation marks of the string sent in
+	private String removeOutsides(String in){
+		StringBuilder str = new StringBuilder();
+		int firstQuote = in.indexOf("\"");
+		int secondQuote = in.indexOf("\"", firstQuote + 1);
+		for(int i = firstQuote + 1; i < secondQuote; i++){
+			str.append(in.charAt(i));
 		}
-		//go past the quotation mark
-		start = start + 1;
-		String key = getKey(in, start);
-		return new MyJSON();
+
+		return str.toString();
+	}
+	//removes all the spaces in a given string
+	private String remove(String in, char toBeRemoved){
+		StringBuilder str = new StringBuilder();
+		for(int i = 0; i < in.length(); i++){
+			if(in.charAt(i) != toBeRemoved){
+				str.append(in.charAt(i));
+			}
+		}
+		return str.toString();
 	}
 	private String escapeCharacters(){
-		
+		return null;
 	}
-	private String getKey(String in, int index){
-		StringBuilder key = new StringBuilder();
-		for(int i = index; i < in.length(); i++){
-			if(in.charAt(i) == "\""){
-				break;
-			}else{
-				key.append(in.charAt(i));
-			}
-		}
-		return key.toString();
-	}
-	//finds the next part of the string that is a non brace and non space
-	private int nonSpaceIndex(String in, int index){
-		for(int i = index; i < in.length(); i++){
-			char current = in.charAt(i);
-			if(current != '{' && current != ')' && current != ' ' && current != '}' 
-					&& current != '(' ){
-				return i;
-			}
-		}
-		//if no more non space/nonbracket characters
-		return -1;
-	}
-
-	//helper method to skip any elemets equal to whatever is passed in
-	private void skipElementsEqualToX(Scanner sc, String x){
-		String element = sc.next();
-		while(element.equals(x)){
-			element = sc.next();
-		}
-	}
-	//checks that all objects have matching brackets
-	private boolean bracketsOkay(String in){
+	
+	//checks that all objects have matching brackets and quotes
+	private boolean syntaxOkay(String in){
 		int numOpenBraces = 0;
 		int numCloseBraces = 0;
-
+		int countQuote = 0;
 		for(int i = 0; i < in.length(); i++){
 			char currentChar = in.charAt(i);
 			if(currentChar == '{'){
-				openBraces++;
+				numOpenBraces++;
 			}else if(currentChar == '}'){
-				closeBraces++;
+				numCloseBraces++;
+			}else if(currentChar == '"'){
+				countQuote++;
 			}
 		}
-		return numOpenBraces == numCloseBraces;
+		return numOpenBraces == numCloseBraces && countQuote % 2 == 0;
 	}
+	
 }
