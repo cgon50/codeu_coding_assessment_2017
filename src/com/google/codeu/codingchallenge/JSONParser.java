@@ -12,16 +12,100 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.codeu.codingchallenge;
+
 
 import java.io.IOException;
+import java.util.Scanner;
+import java.util.HashMap;
+import java.util.Map;
 
-interface JSONParser {
+final class MyJSONParser implements JSONParser {
 
-  // PARSE
-  //
-  // Given a string that should be a valid JSON-lite object encoded as a string
-  // return the parsed object. If for any reason the string is found to be
-  // invalid, the method should throw an IOException.
-  JSON parse(String object) throws IOException;
+	final static int isObject = Integer.MAX_VALUE;
+	final static int isString = Integer.MIN_VALUE;
+	@Override
+	public JSON parse(String in) throws IOException {
+		MyJSON js = new MyJSON();
+		//count brackets make sure they match
+		if(!syntaxOkay(in)){
+			throw new IllegalStateException("Mismatched brackets error");
+		}
+		//get rid of spaces to make things easier
+		String withoutSpaces = remove(in, ' ');
+		//handles edge case of an empty object
+		String withoutBraces = remove(withoutSpaces, '{');
+		withoutBraces = remove(withoutBraces, '}');
+		if(withoutBraces.length() == 0){
+			return js;
+		}
+		int colonIndex = in.indexOf(":");
+		String key = in.substring(0, colonIndex);
+		String value = in.substring(colonIndex + 1);
+		System.out.println(key + "   " + value);
+		if(value.contains(":")){
+			//this means the value is an object
+			
+		}else{
+			key = removeOutsides(key);
+			value = removeOutsides(value);
+			key = remove(key, '"');
+			value = remove(value, '"');
+			js.setString(key, value);
+		}
+		System.out.println(js.getString(key));
+		
+		
+		
+		
+		return js;
+	}
+	//removes everythings outside quotes
+	private String removeOutsides(String in){
+		StringBuilder str = new StringBuilder();
+		int firstQuote = in.indexOf("\"");
+		int secondQuote = in.indexOf("\"", firstQuote + 1);
+		for(int i = firstQuote; i < secondQuote; i++){
+			str.append(in.charAt(i));
+		}
+		return str.toString();
+	}
+	//removes all the spaces in a given string
+	private String remove(String in, char toBeRemoved){
+		StringBuilder str = new StringBuilder();
+		for(int i = 0; i < in.length(); i++){
+			if(in.charAt(i) != toBeRemoved){
+				str.append(in.charAt(i));
+			}
+		}
+		return str.toString();
+	}
+	private String escapeCharacters(){
+		return null;
+	}
+	private int objectOrString(String in){
+		if (in.charAt(0) == '\"' && in.charAt(in.length() - 1) == '\"') {
+            return isString;
+        } else if(in.charAt(0) == '{' && in.charAt(in.length() - 1) == '}'){
+        	return isObject;
+        }
+		return -1;
+	}
+	//checks that all objects have matching brackets and quotes
+	private boolean syntaxOkay(String in){
+		int numOpenBraces = 0;
+		int numCloseBraces = 0;
+		int countQuote = 0;
+		for(int i = 0; i < in.length(); i++){
+			char currentChar = in.charAt(i);
+			if(currentChar == '{'){
+				numOpenBraces++;
+			}else if(currentChar == '}'){
+				numCloseBraces++;
+			}else if(currentChar == '"'){
+				countQuote++;
+			}
+		}
+		return numOpenBraces == numCloseBraces && countQuote % 2 == 0;
+	}
+	
 }
