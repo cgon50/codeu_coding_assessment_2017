@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
+package com.google.codeu.codingchallenge;
 
 import java.io.IOException;
-import java.util.Scanner;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
 
 final class MyJSONParser implements JSONParser {
 
@@ -42,27 +41,39 @@ final class MyJSONParser implements JSONParser {
 		int colonIndex = in.indexOf(":");
 		String key = in.substring(0, colonIndex);
 		String value = in.substring(colonIndex + 1);
-		System.out.println(key + "   " + value);
-		
+
 		if(value.contains(":")){
-			//this means the value is an object
+			//this means the value is an object so we figure out how many strings to add to the object
 			String[] values = value.split(",");
-			for(int i = 0; i < values.length; i++){
-				
-				values[i] = remove(values[i], '{');
-				values[i] = remove(values[i], '}');
-				parse(values[i]);
-					
-			}
-			
+			//creates a temp for the new object
+			MyJSON temp = new MyJSON();
+			fillObject(values, temp);
+			key = removeOutsides(key);
+			js.setObject(key, temp);
 		}else{
 			//the base case that actually puts things as a JSON object
 			key = removeOutsides(key);
 			value = removeOutsides(value);
 			js.setString(key, value);
 		}
-		
+
 		return js;
+	}
+	//handles the case where the value given is itself an object
+	private void fillObject(String[] values, MyJSON objectToBeFilled){
+		for(int i = 0; i < values.length; i++){
+
+			values[i] = remove(values[i], '{');
+			values[i] = remove(values[i], '}');
+			int colIndex = values[i].indexOf(":");
+
+			String name = values[i].substring(0, colIndex);
+			String val = values[i].substring(colIndex + 1, values[i].length());
+			name = removeOutsides(name);
+			val = removeOutsides(val);
+			objectToBeFilled.setString(name, val);
+		}
+
 	}
 	//makes a new string from within the quotation marks of the string sent in
 	private String removeOutsides(String in){
@@ -88,7 +99,7 @@ final class MyJSONParser implements JSONParser {
 	private String escapeCharacters(){
 		return null;
 	}
-	
+
 	//checks that all objects have matching brackets and quotes
 	private boolean syntaxOkay(String in){
 		int numOpenBraces = 0;
@@ -106,5 +117,5 @@ final class MyJSONParser implements JSONParser {
 		}
 		return numOpenBraces == numCloseBraces && countQuote % 2 == 0;
 	}
-	
+
 }
