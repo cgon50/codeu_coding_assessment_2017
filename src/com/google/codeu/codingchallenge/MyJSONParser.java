@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
 package com.google.codeu.codingchallenge;
 
 import java.io.IOException;
@@ -21,8 +22,8 @@ import java.util.Map;
 
 final class MyJSONParser implements JSONParser {
 
-	final static int isObject = Integer.MAX_VALUE;
-	final static int isString = Integer.MIN_VALUE;
+	//takes the original string makes sure that syntax is proper and then creates the objects 
+	//as well as places strings within the objects
 	@Override
 	public JSON parse(String in) throws IOException {
 		MyJSON js = new MyJSON();
@@ -76,7 +77,9 @@ final class MyJSONParser implements JSONParser {
 
 	}
 	//makes a new string from within the quotation marks of the string sent in
+	//also error checks for quotes
 	private String removeOutsides(String in){
+		
 		StringBuilder str = new StringBuilder();
 		int firstQuote = in.indexOf("\"");
 		int secondQuote = in.indexOf("\"", firstQuote + 1);
@@ -96,10 +99,6 @@ final class MyJSONParser implements JSONParser {
 		}
 		return str.toString();
 	}
-	private String escapeCharacters(){
-		return null;
-	}
-
 	//checks that all objects have matching brackets and quotes
 	private boolean syntaxOkay(String in){
 		int numOpenBraces = 0;
@@ -108,8 +107,10 @@ final class MyJSONParser implements JSONParser {
 		for(int i = 0; i < in.length(); i++){
 			char currentChar = in.charAt(i);
 			if(currentChar == '{'){
+				int open = i;
 				numOpenBraces++;
 			}else if(currentChar == '}'){
+				int close = i;
 				numCloseBraces++;
 			}else if(currentChar == '"'){
 				countQuote++;
