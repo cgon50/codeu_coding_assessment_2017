@@ -15,20 +15,22 @@
 package com.google.codeu.codingchallenge;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 final class MyJSON implements JSON {
 	
 	private Map<String, JSON> jsMap;
 	private Map<String, String> stringMap;
 	
-  public MyJson(){
-	  StringsMap = new HashMap<String, String>();
+  public MyJSON(){
+	  stringMap = new HashMap<String, String>();
 	  jsMap = new HashMap<String, JSON>();  
   }
   //returns the JSON object associated with a string
   public JSON getObject(String name) {
 	  if(name.length() < 2)
-		  throw new illegalArgumentException("Not a valid input");
+		  throw new IllegalArgumentException("Not a valid input");
 	  
 	return jsMap.get(name);
   }
@@ -38,7 +40,7 @@ final class MyJSON implements JSON {
   public JSON setObject(String name, JSON value) {
 	 jsMap.put(name, value);
      
-	 return value;
+	 return this;
   }
   
   //gets a string corresponding with a string
@@ -59,17 +61,17 @@ final class MyJSON implements JSON {
   @Override
   public void getObjects(Collection<String> names) {
 	  
-	  for(JSON js: jsMap){
-		  names.add(jsMap.get(js));
-	  }
+
+		  names.addAll(jsMap.keySet());
+	  
   }
 
   //makes a deep copy of all the strings into the collection names
   @Override
   public void getStrings(Collection<String> names) {
     // TODO: implement this
-	  for(String str: stringMap){
-		  names.add(stringMap.get(str));
-	  }
+	 
+		  names.addAll(stringMap.keySet());
+	  
   }
 }
